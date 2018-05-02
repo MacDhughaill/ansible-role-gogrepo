@@ -1,51 +1,22 @@
 ---
-# Consult defaults/main.yml to learn about the role variables.
-- include_vars: "{{ item }}"
-  with_first_found:
-    - "gogrepo_{{ ansible_distribution }}_vars.yml"
-    - "gogrepo_{{ ansible_os_family }}_vars.yml"
-  when: gogrepo_skip_download != true or
-        gogrepo_skip_download is undefined
+- include_tasks: "gogrepo_{{ ansible_distribution }}_tasks.yml"
 
-- include_tasks: "{{ item }}"
-  with_first_found:
-    - "gogrepo_{{ ansible_distribution }}_tasks.yml"
-    - "gogrepo_{{ ansible_os_family }}_tasks.yml"
-  when:
-    - (gogrepo_skip_download != true or gogrepo_skip_download is undefined)
-    - gogrepo_extra_tasks_needed == true
-
-- name: Install packages for gogrepo
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items: "{{ gogrepo_packages }}"
-  become: true
-  when: gogrepo_skip_download != true or
-        gogrepo_skip_download is undefined
-
-- name: Create temporary directory for gogrepo download
+- name: Create temporary directory for download
   tempfile:
     state: directory
   register: gogrepo_temp_dir
-  when: gogrepo_skip_download != true or
-        gogrepo_skip_download is undefined
 
 - name: Download gogrepo
   get_url:
-    url: "{{ gogrepo_install_zip_url }}"
+    url: https://github.com/Kalanyr/gogrepo/archive/dev.zip
     dest: "{{ gogrepo_temp_dir.path }}"
   register: gogrepo_zip_dl_results
-  when: gogrepo_skip_download != true or
-        gogrepo_skip_download is undefined
 
 - name: Extract gogrepo
   unarchive:
     remote_src: true
     src: "{{ gogrepo_zip_dl_results.dest }}"
     dest: "{{ gogrepo_temp_dir.path }}"
-  when: gogrepo_skip_download != true or
-        gogrepo_skip_download is undefined
 
 - name: Find extracted gogrepo
   find:
@@ -53,19 +24,15 @@
     patterns: gogrepoc.py
     recurse: true
   register: gogrepo_find_file_results
-  when: gogrepo_skip_download != true or
-        gogrepo_skip_download is undefined
 
 - block:
-  - name: Create directories for gogrepo
+  - name: Create necessary directories
     file:
       path: "{{ item.gogrepo.dest }}"
       state: directory
       owner: "{{ item.name }}"
       group: "{{ item.name }}"
     with_items: "{{ gogrepo_list }}"
-    when: gogrepo_skip_download != true or
-          gogrepo_skip_download is undefined
 
   - name: Create directories for game downloads
     file:
@@ -85,8 +52,6 @@
     with_nested:
       - "{{ gogrepo_find_file_results.files }}"
       - "{{ gogrepo_list }}"
-    when: gogrepo_skip_download != true or
-          gogrepo_skip_download is undefined
 
   - name: Create directories for gogrepo scripts
     file:

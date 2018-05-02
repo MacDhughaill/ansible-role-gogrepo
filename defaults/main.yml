@@ -1,6 +1,4 @@
 ---
-gogrepo_install_zip_url: https://github.com/Kalanyr/gogrepo/archive/master.zip
-
 gogrepo_list:
   - name: "{{ ansible_user_id }}"
     gogrepo:
