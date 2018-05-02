@@ -1,0 +1,8 @@
+---
+gogrepo_extra_tasks_needed: true
+gogrepo_packages:
+  - pyOpenSSL
+  - python-html5lib
+  - python2-requests
+  - python2-html2text
+  - unzip

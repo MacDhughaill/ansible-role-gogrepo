@@ -1,0 +1,15 @@
+---
+gogrepo_install_zip_url: https://github.com/Kalanyr/gogrepo/archive/master.zip
+
+gogrepo_list:
+  - name: "{{ ansible_user_id }}"
+    gogrepo:
+      dest: "/home/{{ ansible_user_id }}/GOG/gogrepo"
+      download_dir:
+        path: "/home/{{ ansible_user_id }}/GOG"
+      scripts:
+        path: "/home/{{ ansible_user_id/GOG/gogrepo"
+        download_options: "-skipgalaxy"
+        update_options: "-full"
+        verify_options: "-clean"
+# `gogrepo` does NOT like "hanging options" like `-lang en` at the very end.
