@@ -1,4 +1,7 @@
 ---
+gogrepo_absent_files:
+  - gogrepo.zip
+  - gogrepo-dev
 gogrepo_CentOS_packages:
   - python34
   - python34-virtualenv
@@ -6,8 +9,3 @@ gogrepo_CentOS_packages:
 gogrepo_directories:
   - gogrepo
   - py_virt
-gogrepo_symlinks:
-  - path: gogrepo
-    src: /gogrepo/gogrepoc.py
-  - path: gogpy
-    src: /py_virt/bin/python

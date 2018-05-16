@@ -34,16 +34,24 @@
     unarchive:
       src: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
       remote_src: true
-      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo"
-      exclude: README.md
+      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/"
+    with_items: "{{ gogrepo_users }}"
+
+  - name: Copy gogrepo to specific directory
+    copy:
+      src: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo-dev/gogrepoc.py"
+      remote_src: true
+      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo/gogrepoc.py"
       owner: "{{ item.name }}"
       group: "{{ item.name }}"
       mode: u+x
     with_items: "{{ gogrepo_users }}"
 
-  - name: Delete unnecessary downloaded zip file
+  - name: Clean up extraneous files
     file:
-      path: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
+      path: "{{ item[0].root_dir | default('/home/' + item[0].name + '/gogtool') }}/{{ item[1] }}"
       state: absent
-    with_items: "{{ gogrepo_users }}"
+    with_nested:
+      - "{{ gogrepo_users }}"
+      - "{{ gogrepo_absent_files }}"
   become: true
