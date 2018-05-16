@@ -1,8 +1,0 @@
-#!/bin/bash
-# {{ ansible_managed }}
-
-# `-forceverify` to verify all files regardless of previous stature.
-# `-clean` moves all failed files to the `!orphaned` directory.
-python2 {{ item[0].gogrepo.dest }}/gogrepoc.py download {{ item[0].gogrepo.scripts.download_options }} {{ item[0].gogrepo.download_dir }}
-
-exit 0

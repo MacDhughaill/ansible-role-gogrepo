@@ -1,7 +1,0 @@
-#!/bin/bash
-# {{ ansible_managed }}
-
-# `-full` updates all games in the account, including hidden ones.
-python2 {{ item[0].gogrepo.dest }}/gogrepoc.py update {{ item[0].gogrepo.scripts.update_options }}
-
-exit 0

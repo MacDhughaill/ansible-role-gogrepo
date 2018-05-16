@@ -2,7 +2,10 @@
 gogrepo_CentOS_packages:
   - python34
   - python34-virtualenv
-  - git # For use by role only.
+  - unzip # For use by role only.
+gogrepo_directories:
+  - gogrepo
+  - py_virt
 gogrepo_symlinks:
   - path: gogrepo
     src: /gogrepo/gogrepoc.py

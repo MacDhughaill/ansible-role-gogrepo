@@ -2,13 +2,15 @@
 - include_tasks: "gogrepo_{{ ansible_distribution }}_tasks.yml"
 
 - block:
-  - name: Create directory for python virtualenv
+  - name: Create necessary directories
     file:
-      path: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/py_virt"
+      path: "{{ item[0].root_dir | default('/home/' + item[0].name + '/gogtool') }}/{{ item[1] }}"
       state: directory
-      owner: "{{ item.name }}"
-      group: "{{ item.name }}"
-    with_items: "{{ gogrepo_users }}"
+      owner: "{{ item[0].name }}"
+      group: "{{ item[0].name }}"
+    with_nested:
+      - "{{ gogrepo_users }}"
+      - "{{ gogrepo_directories }}"
 
   - name: Install python dependencies in virtualenv
     pip:
@@ -20,18 +22,28 @@
     with_items: "{{ gogrepo_users }}"
 
   - name: Download gogrepo
-    git:
-      repo: https://github.com/Kalanyr/gogrepo.git
-      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo"
-      version: dev
-      depth: '1'
-      update: true
+    get_url:
+      url: https://github.com/Kalanyr/gogrepo/archive/dev.zip
+      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
+      owner: "{{ item.name }}"
+      group: "{{ item.name }}"
+      force: true
     with_items: "{{ gogrepo_users }}"
 
-  - name: Set gogrepo script as executable
-    file:
-      path: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo/gogrepoc.py"
-      state: file
+  - name: Unpack gogrepo
+    unarchive:
+      src: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
+      remote_src: true
+      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo"
+      exclude: README.md
+      owner: "{{ item.name }}"
+      group: "{{ item.name }}"
       mode: u+x
+    with_items: "{{ gogrepo_users }}"
+
+  - name: Delete unnecessary downloaded zip file
+    file:
+      path: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
+      state: absent
     with_items: "{{ gogrepo_users }}"
   become: true
