@@ -1,13 +1,4 @@
 ---
-gogrepo_list:
+gogrepo_users:
   - name: "{{ ansible_user_id }}"
-    gogrepo:
-      dest: "/home/{{ ansible_user_id }}/GOG/gogrepo"
-      download_dir:
-        path: "/home/{{ ansible_user_id }}/GOG"
-      scripts:
-        path: "/home/{{ ansible_user_id/GOG/gogrepo"
-        download_options: "-skipgalaxy"
-        update_options: "-full"
-        verify_options: "-clean"
-# `gogrepo` does NOT like "hanging options" like `-lang en` at the very end.
+#    root_dir:

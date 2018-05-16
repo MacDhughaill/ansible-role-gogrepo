@@ -1,75 +1,37 @@
 ---
 - include_tasks: "gogrepo_{{ ansible_distribution }}_tasks.yml"
 
-- name: Create temporary directory for download
-  tempfile:
-    state: directory
-  register: gogrepo_temp_dir
-
-- name: Download gogrepo
-  get_url:
-    url: https://github.com/Kalanyr/gogrepo/archive/dev.zip
-    dest: "{{ gogrepo_temp_dir.path }}"
-  register: gogrepo_zip_dl_results
-
-- name: Extract gogrepo
-  unarchive:
-    remote_src: true
-    src: "{{ gogrepo_zip_dl_results.dest }}"
-    dest: "{{ gogrepo_temp_dir.path }}"
-
-- name: Find extracted gogrepo
-  find:
-    paths: "{{ gogrepo_temp_dir.path }}"
-    patterns: gogrepoc.py
-    recurse: true
-  register: gogrepo_find_file_results
-
 - block:
-  - name: Create necessary directories
+  - name: Create directory for python virtualenv
     file:
-      path: "{{ item.gogrepo.dest }}"
+      path: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/py_virt"
       state: directory
       owner: "{{ item.name }}"
       group: "{{ item.name }}"
-    with_items: "{{ gogrepo_list }}"
+    with_items: "{{ gogrepo_users }}"
 
-  - name: Create directories for game downloads
+  - name: Install python dependencies in virtualenv
+    pip:
+      name: "html2text html5lib pyOpenSSL requests"
+      state: present
+      virtualenv: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/py_virt"
+      virtualenv_command: "/usr/bin/virtualenv-3.4"
+      virtualenv_python: "/usr/bin/python3.4"
+    with_items: "{{ gogrepo_users }}"
+
+  - name: Download gogrepo
+    git:
+      repo: https://github.com/Kalanyr/gogrepo.git
+      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo"
+      version: dev
+      depth: '1'
+      update: true
+    with_items: "{{ gogrepo_users }}"
+
+  - name: Set gogrepo script as executable
     file:
-      path: "{{ item.gogrepo.download_dir }}"
-      state: directory
-      owner: "{{ item.name }}"
-      group: "{{ item.name }}"
-    with_items: "{{ gogrepo_list }}"
-
-  - name: Copy gogrepo to user's directories
-    copy:
-      remote_src: true
-      src: "{{ item[0].path }}"
-      dest: "{{ item[1].gogrepo.dest }}/gogrepoc.py"
-      owner: "{{ item[1].name }}"
-      group: "{{ item[1].name }}"
-    with_nested:
-      - "{{ gogrepo_find_file_results.files }}"
-      - "{{ gogrepo_list }}"
-
-  - name: Create directories for gogrepo scripts
-    file:
-      path: "{{ item.gogrepo.scripts.path }}"
-      state: directory
-      owner: "{{ item.name }}"
-      group: "{{ item.name }}"
-    with_items: "{{ gogrepo_list }}"
-
-  - name: Copy gogrepo script templates
-    template:
-      src: "{{ item[1] }}.sh.j2"
-      dest: "{{ item[0].gogrepo.scripts.path }}/{{ item[1] }}.sh"
-      owner: "{{ item[0].name }}"
-      group: "{{ item[0].name }}"
+      path: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo/gogrepoc.py"
+      state: file
       mode: u+x
-      force: true
-    with_nested:
-      - "{{ gogrepo_list }}"
-      - [ 'gogrepo_verify', 'gogrepo_update', 'gogrepo_download', 'gogrepo_weekly' ]
+    with_items: "{{ gogrepo_users }}"
   become: true

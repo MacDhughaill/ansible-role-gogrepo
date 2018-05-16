@@ -1,7 +1,10 @@
 ---
 gogrepo_CentOS_packages:
-  - pyOpenSSL
-  - python-html5lib
-  - python2-requests
-  - python2-html2text
-  - unzip # Needed by the role, but not gogrepo
+  - python34
+  - python34-virtualenv
+  - git # For use by role only.
+gogrepo_symlinks:
+  - path: gogrepo
+    src: /gogrepo/gogrepoc.py
+  - path: gogpy
+    src: /py_virt/bin/python
