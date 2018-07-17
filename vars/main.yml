@@ -2,10 +2,6 @@
 gogrepo_absent_files:
   - gogrepo.zip
   - gogrepo-dev
-gogrepo_CentOS_packages:
-  - python34
-  - python34-virtualenv
-  - unzip # For use by role only.
 gogrepo_directories:
   - gogrepo
   - py_virt

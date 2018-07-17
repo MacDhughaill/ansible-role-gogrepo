@@ -1,4 +1,5 @@
 ---
+- include_vars: "gogrepo_{{ ansible_distribution }}_vars.yml"
 - include_tasks: "gogrepo_{{ ansible_distribution }}_tasks.yml"
 
 - block:
@@ -17,8 +18,8 @@
       name: "html2text html5lib pyOpenSSL requests"
       state: present
       virtualenv: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/py_virt"
-      virtualenv_command: "/usr/bin/virtualenv-3.4"
-      virtualenv_python: "/usr/bin/python3.4"
+      virtualenv_command: "{{ gogrepo_virtualenv_command }}"
+      virtualenv_python: "{{ gogrepo_virtualenv_python }}"
     with_items: "{{ gogrepo_users }}"
 
   - name: Download gogrepo
