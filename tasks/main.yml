@@ -40,3 +40,9 @@
     remote_src: true
     dest: "{{ gogrepo_root_dir }}/gogrepo/gogrepoc.py"
     mode: u+x
+
+- name: Copy GOG cookie file to gogrepo directory for import
+  copy:
+    src: "{{ gogrepo_cookie_file }}"
+    dest: "{{ gogrepo_root_dir }}/gogrepo/cookies.txt"
+  when: gogrepo_cookie_file is defined

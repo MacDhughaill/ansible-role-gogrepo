@@ -1,2 +1,3 @@
 ---
+#gogrepo_cookie_file:
 gogrepo_root_dir: "/home/{{ ansible_user_id }}/gogtool"
