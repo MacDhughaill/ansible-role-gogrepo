@@ -2,57 +2,41 @@
 - include_vars: "gogrepo_{{ ansible_distribution }}_vars.yml"
 - include_tasks: "gogrepo_{{ ansible_distribution }}_tasks.yml"
 
-- block:
-  - name: Create necessary directories
-    file:
-      path: "{{ item[0].root_dir | default('/home/' + item[0].name + '/gogtool') }}/{{ item[1] }}"
-      state: directory
-      owner: "{{ item[0].name }}"
-      group: "{{ item[0].name }}"
-    with_nested:
-      - "{{ gogrepo_users }}"
-      - "{{ gogrepo_directories }}"
+# download phase
+- name: Create temporary download directory
+  tempfile:
+    state: directory
+  register: gogrepo_temp_dl_dir
 
-  - name: Install python dependencies in virtualenv
-    pip:
-      name: "html2text html5lib pyOpenSSL requests"
-      state: present
-      virtualenv: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/py_virt"
-      virtualenv_command: "{{ gogrepo_virtualenv_command }}"
-      virtualenv_python: "{{ gogrepo_virtualenv_python }}"
-    with_items: "{{ gogrepo_users }}"
+- name: Download gogrepo
+  get_url:
+    url: https://github.com/Kalanyr/gogrepo/archive/dev.zip
+    dest: "{{ gogrepo_temp_dl_dir.path }}/gogrepo.zip"
 
-  - name: Download gogrepo
-    get_url:
-      url: https://github.com/Kalanyr/gogrepo/archive/dev.zip
-      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
-      owner: "{{ item.name }}"
-      group: "{{ item.name }}"
-      force: true
-    with_items: "{{ gogrepo_users }}"
+- name: Unpack gogrepo
+  unarchive:
+    src: "{{ gogrepo_temp_dl_dir.path }}/gogrepo.zip"
+    remote_src: true
+    dest: "{{ gogrepo_temp_dl_dir.path }}/"
 
-  - name: Unpack gogrepo
-    unarchive:
-      src: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo.zip"
-      remote_src: true
-      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/"
-    with_items: "{{ gogrepo_users }}"
+# installation phase
+- name: Create necessary directories
+  file:
+    path: "{{ gogrepo_root_dir }}/{{ item }}"
+    state: directory
+  with_items: "{{ gogrepo_directories }}"
 
-  - name: Copy gogrepo to specific directory
-    copy:
-      src: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo-dev/gogrepoc.py"
-      remote_src: true
-      dest: "{{ item.root_dir | default('/home/' + item.name + '/gogtool') }}/gogrepo/gogrepoc.py"
-      owner: "{{ item.name }}"
-      group: "{{ item.name }}"
-      mode: u+x
-    with_items: "{{ gogrepo_users }}"
+- name: Install python dependencies in virtualenv
+  pip:
+    name: "html2text html5lib pyOpenSSL requests"
+    state: present
+    virtualenv: "{{ gogrepo_root_dir }}/py_virt"
+    virtualenv_command: "{{ gogrepo_virtualenv_command }}"
+    virtualenv_python: "{{ gogrepo_virtualenv_python }}"
 
-  - name: Clean up extraneous files
-    file:
-      path: "{{ item[0].root_dir | default('/home/' + item[0].name + '/gogtool') }}/{{ item[1] }}"
-      state: absent
-    with_nested:
-      - "{{ gogrepo_users }}"
-      - "{{ gogrepo_absent_files }}"
-  become: true
+- name: Copy gogrepo to specific directory
+  copy:
+    src: "{{ gogrepo_temp_dl_dir.path }}/gogrepo-dev/gogrepoc.py"
+    remote_src: true
+    dest: "{{ gogrepo_root_dir }}/gogrepo/gogrepoc.py"
+    mode: u+x

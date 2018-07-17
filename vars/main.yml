@@ -1,7 +1,4 @@
 ---
-gogrepo_absent_files:
-  - gogrepo.zip
-  - gogrepo-dev
 gogrepo_directories:
   - gogrepo
   - py_virt

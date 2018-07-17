@@ -1,4 +1,2 @@
 ---
-gogrepo_users:
-  - name: "{{ ansible_user_id }}"
-#    root_dir:
+gogrepo_root_dir: "/home/{{ ansible_user_id }}/gogtool"
